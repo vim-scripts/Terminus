@@ -6,10 +6,11 @@ CONTENTS                                                    *terminus-contents*
 2. Installation     |terminus-installation|
 3. Options          |terminus-options|
 4. Overrides        |terminus-overrides|
-5. Website          |terminus-website|
-6. License          |terminus-license|
-7. Authors          |terminus-authors|
-8. History          |terminus-history|
+5. Troubleshooting  |terminus-troubleshooting|
+6. Website          |terminus-website|
+7. License          |terminus-license|
+8. Authors          |terminus-authors|
+9. History          |terminus-history|
 
 
 INTRO                                                          *terminus-intro*
@@ -26,7 +27,8 @@ particularly when using tmux (https://tmux.github.io/) and iTerm
 1. Cursor shape change in insert mode ~
 
 In insert mode, the cursor shape changes to a thin vertical bar. On leaving
-inset mode, it reverts to the standard "block" shape.
+insert mode, it reverts to the standard "block" shape. Configuration options
+are provided to select among vertical bar, block, and "underline" shapes.
 
 2. Improved mouse support ~
 
@@ -80,6 +82,48 @@ OPTIONS                                                      *terminus-options*
 
     let g:TerminusCursorShape=0
 <
+                                                  *g:TerminusInsertCursorShape*
+  |g:TerminusInsertCursorShape|                             number (default: 1)
+
+  Controls the shape of the cursor in insert mode. Possible values are:
+
+  - 0: "block" shape
+  - 1: "bar" shape
+  - 2: "underline" shape
+
+  To override the default, set a new value in your |.vimrc|: >
+
+    let g:TerminusInsertCursorShape=0
+<
+  The value set here is passed directly through to iTerm, so if future
+  versions of iTerm start to support other possible shapes, Terminus will
+  support those automatically. (And conversely, if you supply an invalid
+  value, iTerm may have undefined behavior.)
+
+  Note: has no effect if cursor shape changing is disabled via the
+  |g:TerminusCursorShape| setting.
+
+                                                  *g:TerminusNormalCursorShape*
+  |g:TerminusNormalCursorShape|                             number (default: 0)
+
+  Controls the shape of the cursor in normal mode. Possible values are:
+
+  - 0: "block" shape
+  - 1: "bar" shape
+  - 2: "underline" shape
+
+  To override the default, set a new value in your |.vimrc|: >
+
+    let g:TerminusNormalCursorShape=2
+<
+  The value set here is passed directly through to iTerm, so if future
+  versions of iTerm start to support other possible shapes, Terminus will
+  support those automatically. (And conversely, if you supply an invalid
+  value, iTerm may have undefined behavior.)
+
+  Note: has no effect if cursor shape changing is disabled via the
+  |g:TerminusCursorShape| setting.
+
                                                               *g:TerminusMouse*
   |g:TerminusMouse|                                         boolean (default: 1)
 
@@ -155,6 +199,59 @@ To override any of these choices, you can place overrides in an
   set noautoread
 
 
+TROUBLESHOOTING                                      *terminus-troubleshooting*
+
+Some features work in iTerm but not in Apple's Terminal.app ~
+
+The following features are known to work in iTerm but not in Apple's
+Terminal.app due to limitations in the latter:
+
+- Cursor shape changes.
+- |FocusGained| and |FocusLost| events.
+- Improved mouse support.
+
+Upgrading to iTerm is strongly recommended.
+
+Focus events aren't working inside tmux prior to 1.8 ~
+
+tmux only added support for per-pane focus events in version 1.8.
+
+Focus events aren't working inside tmux 1.9 and up ~
+
+In tmux 1.9, focus events aren't reported unless the `focus-events` option is
+set to "on" in the `~/.tmux.conf` file: >
+
+  set -g focus-events on
+
+Mouse support and other features aren't working in tmux ~
+
+In the iTerm settings, ensure that "Enable mouse reporting" is enabled, and
+the "Report Terminal Type" setting is set to "xterm-256color".
+
+I can't copy text to the clipboard ~
+
+In the iTerm settings, ensure that "Copy to pasteboard on selection" is
+disabled (under "Selection" in the "General" section of the preferences), then
+hold down the Option key when making a selection, then press Command-C to
+copy.
+
+For seamless integration between the local system clipboard and terminal-based
+processes (even processes running on remote systems via SSH, inside tmux,
+inside Vim etc), consider using Clipper (https://github.com/wincent/clipper),
+along with the vim-clipper plug-in (https://github.com/wincent/vim-clipper).
+
+The cursor is hard to see in insert mode ~
+
+In insert mode, the cursor becomes a narrow bar, which may be hard to see
+depending on your color scheme and other settings.
+
+Reducing visual clutter may be helpful in this case. For example, you might
+turn off 'cursorline' and 'cursorcolumn' when in insert mode (sample
+configuration from my dotfiles: https://wt.pe/g). Alternatively, you can try
+a different cursor shapes by changing the |g:TerminusInsertCursorShape| and
+|g:TerminusNormalCursorShape| settings.
+
+
 WEBSITE                                                      *terminus-website*
 
 The official Terminus source code repo is at:
@@ -203,10 +300,15 @@ Terminus is written and maintained by Greg Hurrell <greg@hurrell.net>.
 
 HISTORY                                                      *terminus-history*
 
+0.2 (24 July 2015)
+
+- Added |g:TerminusInsertCursorShape| and |g:TerminusNormalCursorShape|
+  settings for selecting among "bar", "block" and "underline" cursor shapes.
+
 0.1 (6 July 2015)
 
-- initial release, extracted from my dotfiles
-  (https://github.com/wincent/wincent)
+- Initial release, extracted from my dotfiles
+  (https://github.com/wincent/wincent).
 
 
 -----------------------------------------------------------------------------
