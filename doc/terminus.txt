@@ -3,14 +3,16 @@
 CONTENTS                                                    *terminus-contents*
 
 1. Intro            |terminus-intro|
-2. Installation     |terminus-installation|
-3. Options          |terminus-options|
-4. Overrides        |terminus-overrides|
-5. Troubleshooting  |terminus-troubleshooting|
-6. Website          |terminus-website|
-7. License          |terminus-license|
-8. Authors          |terminus-authors|
-9. History          |terminus-history|
+2. Requirements     |terminus-requirements|
+3. Installation     |terminus-installation|
+4. Options          |terminus-options|
+5. Overrides        |terminus-overrides|
+6. Troubleshooting  |terminus-troubleshooting|
+7. Website          |terminus-website|
+8. License          |terminus-license|
+9. Development      |terminus-development|
+10. Authors         |terminus-authors|
+11. History         |terminus-history|
 
 
 INTRO                                                          *terminus-intro*
@@ -22,13 +24,15 @@ INTRO                                                          *terminus-intro*
                                                             *terminus-features*
 Terminus enhances Vim's integration with the terminal in four ways,
 particularly when using tmux (https://tmux.github.io/) and iTerm
-(https://www.iterm2.com/), closing the gap between terminal and GUI Vim:
+(https://www.iterm2.com/) or KDE Konsole (https://konsole.kde.org/), closing
+the gap between terminal and GUI Vim:
 
-1. Cursor shape change in insert mode ~
+1. Cursor shape change in insert and replace mode ~
 
-In insert mode, the cursor shape changes to a thin vertical bar. On leaving
-insert mode, it reverts to the standard "block" shape. Configuration options
-are provided to select among vertical bar, block, and "underline" shapes.
+In insert mode, the cursor shape changes to a thin vertical bar. In replace
+mode, it changes to an underline. On returning to normal mode, it reverts to
+the standard "block" shape. Configuration options are provided to select among
+the different shapes.
 
 2. Improved mouse support ~
 
@@ -48,6 +52,22 @@ from Vim.
 
 Sets up "Bracketed Paste" mode, which means you can forget about manually
 setting the 'paste' option and simply go ahead and paste in any mode.
+
+
+REQUIREMENTS                                            *terminus-requirements*
+
+Terminus was principally developed to enhance Vim's integration with iTerm,
+but it can also improve the experience on other terminals, albeit with some
+limitations:
+
+- iTerm (https://www.iterm2.com/): Fully supported.
+- Konsole (https://konsole.kde.org/): Supports iTerm escape sequences, so
+  Terminus treats it just like iTerm.
+- gnome-terminal (https://wiki.gnome.org/Apps/Terminal) and other terminals
+  using the VTE library (https://github.com/GNOME/vte): Partially supported
+  (for example, supports cursor shape changes but not focus reporting).
+
+For other known limitations and problems, see |terminus-troubleshooting|.
 
 
 INSTALLATION                                            *terminus-installation*
@@ -78,7 +98,7 @@ OPTIONS                                                      *terminus-options*
   |g:TerminusCursorShape|                                  boolean (default: 1)
 
   Controls whether cursor shape changes are made when entering or leaving
-  insert mode. To disable, set to 0: >
+  insert and replace modes. To disable, set to 0: >
 
     let g:TerminusCursorShape=0
 <
@@ -95,10 +115,10 @@ OPTIONS                                                      *terminus-options*
 
     let g:TerminusInsertCursorShape=0
 <
-  The value set here is passed directly through to iTerm, so if future
-  versions of iTerm start to support other possible shapes, Terminus will
-  support those automatically. (And conversely, if you supply an invalid
-  value, iTerm may have undefined behavior.)
+  The value set here is passed directly through to iTerm (and Konsole), so if
+  future versions of those terminals start to support other possible shapes,
+  Terminus will support those automatically. (And conversely, if you supply an
+  invalid value, the terminal may have undefined behavior.)
 
   Note: has no effect if cursor shape changing is disabled via the
   |g:TerminusCursorShape| setting.
@@ -116,10 +136,31 @@ OPTIONS                                                      *terminus-options*
 
     let g:TerminusNormalCursorShape=2
 <
-  The value set here is passed directly through to iTerm, so if future
-  versions of iTerm start to support other possible shapes, Terminus will
-  support those automatically. (And conversely, if you supply an invalid
-  value, iTerm may have undefined behavior.)
+  The value set here is passed directly through to iTerm (and Konsole), so if
+  future versions of those terminals start to support other possible shapes,
+  Terminus will support those automatically. (And conversely, if you supply an
+  invalid value, the terminal may have undefined behavior.)
+
+  Note: has no effect if cursor shape changing is disabled via the
+  |g:TerminusCursorShape| setting.
+
+                                                 *g:TerminusReplaceCursorShape*
+  |g:TerminusReplaceCursorShape|                            number (default: 2)
+
+  Controls the shape of the cursor in replace mode. Possible values are:
+
+  - 0: "block" shape
+  - 1: "bar" shape
+  - 2: "underline" shape
+
+  To override the default, set a new value in your |.vimrc|: >
+
+    let g:TerminusReplaceCursorShape=1
+<
+  The value set here is passed directly through to iTerm (and Konsole), so if
+  future versions of those terminals start to support other possible shapes,
+  Terminus will support those automatically. (And conversely, if you supply an
+  invalid value, the terminal may have undefined behavior.)
 
   Note: has no effect if cursor shape changing is disabled via the
   |g:TerminusCursorShape| setting.
@@ -154,10 +195,11 @@ OPTIONS                                                      *terminus-options*
                                                         *g:TerminusAssumeITerm*
   |g:TerminusAssumeITerm|                                      any (no default)
 
-  Terminus will try to autodetect when Vim is running inside of iTerm,
-  but it is possible that when running on a remote host via SSH the necessary
-  environment variables (`$ITERM_PROFILE` or `$ITERM_SESSION_ID`) may not be
-  present.
+  Terminus will try to autodetect when Vim is running inside of iTerm or an
+  iTerm-like terminal such as Konsole, but it is possible that when running on
+  a remote host via SSH the necessary environment variables (`$ITERM_PROFILE`,
+  `$ITERM_SESSION_ID`, `$KONSOLE_DBUS_SESSION` or `$KONSOLE_PROFILE_NAME`) may
+  not be present.
 
   In this case, it is possible to signal to Terminus that iTerm is operative by
   doing either of the following:
@@ -293,12 +335,63 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
 
+DEVELOPMENT                                              *terminus-development*
+
+Contributing patches ~
+
+Patches can be sent via mail to greg@hurrell.net, or as GitHub pull requests
+at: https://github.com/wincent/terminus/pulls
+
+Cutting a new release ~
+
+At the moment the release process is manual:
+
+- Perform final sanity checks and manual testing
+- Update the |terminus-history| section of the documentation
+- Verify clean work tree: >
+
+    git status
+
+- Tag the release: >
+
+    git tag -s -m "$VERSION release" $VERSION
+
+- Publish the code: >
+
+    git push origin master --follow-tags
+    git push github master --follow-tags
+
+- Produce the release archive: >
+
+    git archive -o terminus-$VERSION.zip HEAD -- .
+
+- Upload to http://www.vim.org/scripts/script.php?script_id=5216
+
+
 AUTHORS                                                      *terminus-authors*
 
 Terminus is written and maintained by Greg Hurrell <greg@hurrell.net>.
 
+Other contributors that have submitted patches include (in alphabetical
+order):
+
+  Jan Christoph Ebersbach
+  Joe Lencioni
+
 
 HISTORY                                                      *terminus-history*
+
+0.4 (15 October 2015)
+
+- Enabled support for KDE Konsole (patch from Jan Christoph Ebersbach).
+- Added |g:TerminusReplaceCursorShape| and made cursor shape substition work
+  with VTE terminals such as gnome-terminal (patch from Jan Christoph
+  Ebersbach).
+- Fixed bug where file modelines were being inappropriately evaluated when on
+  |FocusGained| and |FocusLost| events.
+- Added guard for "Unknown option: t_SR" for older versions of Vim (patch from
+  Joe Lencioni).
+- Added support for "tmux" `TERM` type.
 
 0.2 (24 July 2015)
 
