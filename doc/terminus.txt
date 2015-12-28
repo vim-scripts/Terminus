@@ -245,7 +245,7 @@ TROUBLESHOOTING                                      *terminus-troubleshooting*
 
 Some features work in iTerm but not in Apple's Terminal.app ~
 
-The following features are known to work in iTerm but not in Apple's
+The following features are known to work in iTerm but may not work in Apple's
 Terminal.app due to limitations in the latter:
 
 - Cursor shape changes.
@@ -269,6 +269,12 @@ Mouse support and other features aren't working in tmux ~
 
 In the iTerm settings, ensure that "Enable mouse reporting" is enabled, and
 the "Report Terminal Type" setting is set to "xterm-256color".
+
+Cursor shape changes and other features aren't working on remote hosts ~
+
+If you are connecting to remote hosts via Mosh (https://mosh.mit.edu/) instead
+of SSH, be aware that Mosh lacks support for some xterm control sequences and
+cannot change the cursor (https://github.com/mobile-shell/mosh/issues/352).
 
 I can't copy text to the clipboard ~
 
@@ -358,8 +364,8 @@ At the moment the release process is manual:
 
 - Publish the code: >
 
-    git push origin master --follow-tags
-    git push github master --follow-tags
+    git push --follow-tags
+    git push github --follow-tags
 
 - Produce the release archive: >
 
@@ -380,6 +386,11 @@ order):
 
 
 HISTORY                                                      *terminus-history*
+
+1.0 (28 December 2015)
+
+- Silence unwanted "No matching autocommands" output on gaining/losing focus
+  in normal mode.
 
 0.4 (15 October 2015)
 
